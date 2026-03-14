@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkEdu Hub | Авторизація</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="light-theme">
+
+    <div id="auth-page" class="auth-wrapper">
+        <div class="auth-card">
+            <div class="logo">LinkEdu<span>Hub</span></div>
+            <h2>Вхід у систему</h2>
+            
+            <div class="role-selection">
+                <button onclick="login('guest')" class="btn-role">Гість</button>
+                <button onclick="login('user')" class="btn-role">Користувач</button>
+                <button onclick="login('admin')" class="btn-role">Адміністратор</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" style="display: none;">
+        <nav class="navbar">
+            <div class="logo">LinkEdu<span>Hub</span></div>
+            
+            <div class="nav-tabs user-only">
+                <button class="tab-btn active" id="tab-catalog" onclick="switchView('catalog')">🌐 Глобальний каталог</button>
+                <button class="tab-btn" id="tab-cabinet" onclick="switchView('cabinet')">🎓 Моє навчання</button>
+            </div>
+
+            <div class="nav-controls">
+                <span id="display-role" class="role-badge"></span>
+                <button onclick="toggleTheme()" class="btn-theme">🌓 Тема</button>
+                <button onclick="logout()" class="btn-logout">Вийти</button>
+            </div>
+        </nav>
+
+        <header class="controls-section">
+            <input type="text" id="searchInput" placeholder="Пошук за назвою..." oninput="handleSearch(event)">
+            <div class="filter-group">
+                <button class="filter-btn active" data-type="all" onclick="setFilter('all')">УСЕ</button>
+                <button class="filter-btn" data-type="video" onclick="setFilter('video')">ВІДЕО</button>
+                <button class="filter-btn" data-type="article" onclick="setFilter('article')">СТАТТІ</button>
+                <button class="filter-btn" data-type="course" onclick="setFilter('course')">КУРСИ</button>
+            </div>
+            <button class="btn-add admin-only" onclick="alert('Додавання ресурсу')">+ Додати ресурс</button>
+        </header>
+
+        <main class="layout-wrapper">
+            <section class="primary-module">
+                <div id="content-grid" class="content-grid"></div>
+                
+                <div id="pagination-controls" class="pagination-controls"></div>
+            </section>
+
+            <aside class="secondary-module">
+                <div class="widget user-only">
+                    <h4>🕒 ОСТАННІ ВІДВІДАНІ</h4>
+                    <ul id="recent-list" class="recent-list">
+                        <li class="empty-text">Історія порожня</li>
+                    </ul>
+                </div>
+                <div class="widget admin-only">
+                    <h4>⚙️ ПАНЕЛЬ АДМІНА</h4>
+                    <p>Повний доступ до модерації каталогу.</p>
+                </div>
+                <div class="widget guest-only">
+                    <h4>🔒 ОБМЕЖЕНИЙ ДОСТУП</h4>
+                    <p>Увійдіть як Користувач, щоб зберігати історію.</p>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-container">
+                
+                <div class="footer-col">
+                    <div class="logo">LinkEdu<span>Hub</span></div>
+                    <p>Адаптивний вебзастосунок для зручної каталогізації та відстеження навчальних матеріалів.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Розробник</h4>
+                    <ul>
+                        <li>👤 Гаран Іван, гр. ІК-33</li>
+                        <li>📞 <a href="tel:+380997546149">+38 (099) 754-61-49</a></li>
+                        <li>✈️ <a href="https://t.me/Garanvanya" target="_blank">@Garanvanya</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Навігація</h4>
+                    <ul>
+                        <li><a href="https://github.com/prosto-ivan/planer" target="_blank">💻 GitHub проєкту</a></li>
+                        <li><a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">⬆️ На гору сторінки</a></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
