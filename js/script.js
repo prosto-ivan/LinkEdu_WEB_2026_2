@@ -25,6 +25,24 @@ let state = {
     currentView: 'catalog' 
 };
 
+// 1. Об'єкт з SVG іконками для різних типів контенту
+const icons = {
+    video: `<svg viewBox="0 0 24 24" class="card-icon" style="stroke: var(--color-video)"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+    article: `<svg viewBox="0 0 24 24" class="card-icon" style="stroke: var(--color-article)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+    course: `<svg viewBox="0 0 24 24" class="card-icon" style="stroke: var(--color-course)"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>`
+};
+
+// Допоміжна функція для отримання тексту статусу
+function getStatusLabel(status) {
+    const labels = {
+        'none': '+ Додати',
+        'planned': 'Планую',
+        'learning': 'Вчу',
+        'learned': 'Вивчено'
+    };
+    return labels[status] || '+ Додати';
+}
+
 // Авторизація та вихід
 function login(role) {
     state.currentUserRole = role;
@@ -55,9 +73,11 @@ function switchView(viewName) {
     renderCards();
 }
 
-// Рендеринг контенту
+// метод рендерингу карток
 function renderCards() {
-    const grid = document.getElementById('content-grid');
+    const grid = document.getElementById('content-grid'); 
+    if (!grid) return;
+    
     grid.innerHTML = '';
 
     const filteredData = resources.filter(item => {
@@ -68,41 +88,41 @@ function renderCards() {
     });
 
     if (filteredData.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Нічого не знайдено 😕</div>`;
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary);">Нічого не знайдено</div>`;
         renderPagination(0, 0);
         return;
     }
 
     filteredData.slice(0, state.visibleCount).forEach(item => {
-        grid.appendChild(createCardElement(item));
+        const card = document.createElement('div');
+        card.className = `card status-${item.status} resource-card`;
+        card.setAttribute('data-type', item.type); 
+        
+        const iconSvg = icons[item.type] || icons.article;
+
+        let actions = '';
+        if (state.currentUserRole === 'admin') {
+            actions = `<button class="btn-status" onclick="alert('Редагування')">✏️ Редагувати</button>`;
+        } else if (state.currentUserRole === 'user') {
+            actions = `<button class="btn-status" onclick="cycleStatus(${item.id})">${getStatusLabel(item.status)}</button>`;
+        }
+
+        card.innerHTML = `
+            <div class="card-thumbnail-svg">${iconSvg}</div>
+            
+            <div class="card-body">
+                <div class="card-meta">
+                    <span class="badge type-${item.type}">${item.type.toUpperCase()}</span>
+                </div>
+                <h3 class="card-title" onclick="trackVisit(${item.id})">${item.title}</h3>
+            </div>
+            
+            <div class="card-actions">${actions}</div>
+        `;
+        grid.appendChild(card);
     });
 
     renderPagination(state.visibleCount, filteredData.length);
-}
-
-function createCardElement(item) {
-    const div = document.createElement('div');
-    div.className = `card status-${item.status}`;
-    const typeNames = { 'video': 'Відео', 'article': 'Стаття', 'course': 'Курс' };
-    const statusNames = { 'none': 'Новий', 'planned': 'Планую', 'learning': 'Вчу', 'learned': 'Вивчено' };
-
-    let actions = '';
-    if (state.currentUserRole === 'admin') {
-        actions = `<button class="btn-status" onclick="alert('Редагування')">✏️ Редагувати</button>`;
-    } else if (state.currentUserRole === 'user') {
-        const btnText = item.status === 'none' ? '+ Додати' : 'Змінити статус';
-        actions = `<button class="btn-status" onclick="cycleStatus(${item.id})">${btnText}</button>`;
-    }
-
-    div.innerHTML = `
-        <div class="card-header">
-            <span class="type-${item.type}">${typeNames[item.type].toUpperCase()}</span>
-            <span class="status-badge">${statusNames[item.status]}</span>
-        </div>
-        <h3 onclick="trackVisit(${item.id})">${item.title}</h3>
-        <div class="card-actions">${actions}</div>
-    `;
-    return div;
 }
 
 // Пагінація

@@ -350,6 +350,152 @@ body {
     transform: translateX(5px);
 }
 
+/* КАРТКИ РЕСУРСІВ — НОВИЙ ВИГЛЯД */
+.resource-card {
+    background: var(--surface-color);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.resource-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+    border-color: var(--accent-color);
+}
+
+/* Контейнер іконки */
+.card-thumbnail-svg {
+    height: 120px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.03);
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.resource-card:hover .card-thumbnail-svg {
+    background: rgba(0, 123, 255, 0.05); /* Легкий підсвіт при наведенні */
+}
+
+/* Мета-дані (Бедж та дата) */
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.badge {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+/* Кольори беджів залежно від типу */
+[data-type="video"] .badge { background: #ffebeb; color: var(--color-video); }
+[data-type="article"] .badge { background: #e8f9ed; color: var(--color-article); }
+[data-type="course"] .badge { background: #f4ebff; color: var(--color-course); }
+
+.card-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Текст */
+.card-title {
+    font-size: 18px;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.card-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+/* Кнопки */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto; /* Притискає кнопки до низу */
+}
+
+.btn-main, .btn-status {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    border: none;
+}
+
+.btn-main {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-status {
+    background: var(--bg-color);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-main:hover { opacity: 0.9; }
+.btn-status:hover { background: var(--border-color); }
+
+/* Темна тема — адаптація */
+body.dark-theme .card-thumbnail-svg {
+    background: rgba(255,255,255,0.05);
+}
+body.dark-theme .badge {
+    background: rgba(255,255,255,0.1);
+}
+
+/* Стиль для іконок на картках */
+.card-thumbnail-svg {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.card-icon {
+    width: 45px;
+    height: 45px;
+    fill: none;
+    stroke-width: 2;
+}
+/* Стиль для головної ілюстрації на фоні авторизації */
+.hero-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    z-index: -1; /* Щоб була на фоні */
+    pointer-events: none;
+}
+
 /* ФУТЕР */
 .footer {
     background: var(--surface-color);
