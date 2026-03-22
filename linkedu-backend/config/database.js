@@ -1,9 +1,4 @@
-/**
- * LinkEdu Hub -- Database connection (MS SQL Server via Sequelize)
- * Author: Haran Ivan, group IK-33
- *
- * Install dependencies: npm install sequelize tedious
- */
+
 
 const { Sequelize } = require('sequelize');
 

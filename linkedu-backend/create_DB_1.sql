@@ -22,7 +22,7 @@ BEGIN
 END
 GO
 
--- 3. Table Resources (learning resources)
+-- 3. Table Resources (learning )
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Resources')
 BEGIN
     CREATE TABLE Resources (
@@ -43,8 +43,6 @@ BEGIN
 END
 GO
 
--- 4. Seed Data -- initial records for demonstration
-
 -- Insert test users
 INSERT INTO Users (username, email, password_hash, role)
 VALUES
@@ -53,7 +51,7 @@ VALUES
     ('user_petro',  'petro@linkedu.ua',  'hash_user789',  'user');
 GO
 
--- Insert learning resources (created_by = 1, i.e. admin_ivan)
+-- Insert learning resources 
 INSERT INTO Resources (title, url, description, type, status, created_by)
 VALUES
     ('JavaScript and TypeScript: Complete Guide',
@@ -97,7 +95,7 @@ VALUES
      'article', 'none', 1);
 GO
 
--- 5. Demo SQL queries
+-- Demo SQL queries
 
 -- SELECT: All resources
 PRINT '--- SELECT: All resources ---';

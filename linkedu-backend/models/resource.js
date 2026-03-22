@@ -1,9 +1,3 @@
-/**
- * Модель Resource (таблиця Resources)
- * Відповідає навчальним ресурсам у каталозі LinkEduHub
- * Зв'язок: User hasMany Resource (One-to-Many)
- */
-
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/Database');
 
@@ -39,7 +33,7 @@ const Resource = sequelize.define('Resource', {
   created_by: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    // Зовнішній ключ — вказує на Users.user_id
+    // ключ вказує на Users.user_id
   },
 }, {
   tableName: 'Resources',

@@ -1,31 +1,28 @@
-/**
- * LinkEdu Hub -- Backend server (Node.js + Sequelize + MS SQL Server)
- * Author: Haran Ivan, group IK-33
- *
+/*
  * Run:    node server.js
  * Setup:  npm install sequelize tedious
  */
 
 const sequelize = require('./config/Database');
 const User      = require('./models/User');
-const Resource  = require('./models/Resource');
+const Resource  = require('./models/resource');
 
-// ── 1. One-to-Many relationship: User hasMany Resources ──────────────────────
+// One-to-Many relationship
 User.hasMany(Resource, { foreignKey: 'created_by', as: 'resources' });
 Resource.belongsTo(User, { foreignKey: 'created_by', as: 'author' });
 
-// ── 2. Main function ──────────────────────────────────────────────────────────
-async function main() {
+// Main function 
+async function  main() {
   try {
     // Check connection
     await sequelize.authenticate();
     console.log('\n✅ Connected to MS SQL Server!\n');
 
-    // Sync models (does not recreate existing tables)
+    // Sync models 
     await sequelize.sync({ force: false });
-    console.log('✅ Models synced with database\n');
+    console.log(' Models synced with database\n');
 
-    // ── INSERT: Create user (findOrCreate avoids duplicate errors) ────────────
+    // INSERT: Create user 
     const [admin, adminCreated] = await User.findOrCreate({
       where: { email: 'ivan@linkedu.ua' },
       defaults: {
@@ -34,9 +31,9 @@ async function main() {
         role:          'admin',
       }
     });
-    console.log(`✅ User: ${admin.username} (id=${admin.user_id}) | ${adminCreated ? 'created' : 'already exists'}`);
+    console.log(`User: ${admin.username} (id=${admin.user_id}) | ${adminCreated ? 'created' : 'already exists'}`);
 
-    // ── INSERT: Create resources ──────────────────────────────────────────────
+    // INSERT: Create resources 
     const [res1, res1Created] = await Resource.findOrCreate({
       where: { title: 'JavaScript and TypeScript: Complete Guide' },
       defaults: {
@@ -59,18 +56,18 @@ async function main() {
       }
     });
 
-    console.log(`✅ Resource: "${res1.title}" | ${res1Created ? 'created' : 'already exists'}`);
-    console.log(`✅ Resource: "${res2.title}" | ${res2Created ? 'created' : 'already exists'}\n`);
+    console.log(` Resource: "${res1.title}" | ${res1Created ? 'created' : 'already exists'}`);
+    console.log(` Resource: "${res2.title}" | ${res2Created ? 'created' : 'already exists'}\n`);
 
-    // ── SELECT: Get all resources ─────────────────────────────────────────────
-    console.log('─── SELECT: All resources ──────────────────────────────────────');
+    //  SELECT: Get all resources 
+    console.log(' SELECT: All resources ');
     const allResources = await Resource.findAll();
     allResources.forEach(r =>
       console.log(`  [${r.resource_id}] ${r.title} | type: ${r.type} | status: ${r.status}`)
     );
 
-    // ── SELECT with JOIN: Resources with author ───────────────────────────────
-    console.log('\n─── SELECT JOIN: Resources with author ─────────────────────────');
+    //  SELECT with JOIN: Resources with author 
+    console.log('\n SELECT JOIN: Resources with author ');
     const withAuthor = await Resource.findAll({
       include: [{ model: User, as: 'author', attributes: ['username', 'email'] }],
     });
@@ -78,8 +75,8 @@ async function main() {
       console.log(`  "${r.title}" -- author: ${r.author?.username}`)
     );
 
-    // ── SELECT: All resources of a specific user ──────────────────────────────
-    console.log('\n─── SELECT: Resources of admin ─────────────────────────────────');
+    // SELECT: All resources of a specific user 
+    console.log('\n SELECT: Resources of admin');
     const adminWithResources = await User.findByPk(admin.user_id, {
       include: [{ model: Resource, as: 'resources' }],
     });
@@ -87,8 +84,8 @@ async function main() {
       console.log(`  - ${r.title} (${r.type})`)
     );
 
-    // ── UPDATE: Change resource status ────────────────────────────────────────
-    console.log('\n─── UPDATE: Change status of first resource ────────────────────');
+    // UPDATE: Change resource status 
+    console.log('\n UPDATE: Change status of first resource ');
     await Resource.update(
       { status: 'learned' },
       { where: { resource_id: res1.resource_id } }
@@ -96,19 +93,19 @@ async function main() {
     const updated = await Resource.findByPk(res1.resource_id);
     console.log(`  New status of "${updated.title}": ${updated.status}`);
 
-    // ── DELETE: Remove a resource ─────────────────────────────────────────────
-    console.log('\n─── DELETE: Remove second resource ─────────────────────────────');
+    // DELETE: Remove a resource
+    console.log('\n DELETE: Remove second resource');
     await Resource.destroy({ where: { resource_id: res2.resource_id } });
     const remaining = await Resource.findAll();
     console.log(`  Resources remaining in DB: ${remaining.length}`);
 
-    console.log('\n✅ All CRUD operations completed successfully!');
+    console.log('\n All CRUD operations completed successfully!');
 
   } catch (err) {
-    console.error('❌ Error:', err.message);
+    console.error(' Error:', err.message);
   } finally {
     await sequelize.close();
-    console.log('\n🔒 Database connection closed.');
+    console.log('\n Database connection closed.');
   }
 }
 

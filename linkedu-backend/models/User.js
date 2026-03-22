@@ -1,8 +1,3 @@
-/**
- * Модель User (таблиця Users)
- * Відповідає таблиці Users у базі даних LinkEduHub
- */
-
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/Database');
 
