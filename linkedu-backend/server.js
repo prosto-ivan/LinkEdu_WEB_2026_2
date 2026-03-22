@@ -16,7 +16,7 @@ async function  main() {
   try {
     // Check connection
     await sequelize.authenticate();
-    console.log('\n✅ Connected to MS SQL Server!\n');
+    console.log('\n Connected to MS SQL Server!\n');
 
     // Sync models 
     await sequelize.sync({ force: false });
