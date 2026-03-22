@@ -1,11 +1,11 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/Database');
+const sequelize = require('../config/database');
 
 const User = sequelize.define('User', {
   user_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+    primaryKey: true,    // ВАЖЛИВО: CamelCase
+    autoIncrement: true  // Тільки один автоінкремент на модель
   },
   username: {
     type: DataTypes.STRING(50),
@@ -20,20 +20,14 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(255),
     allowNull: false,
   },
-  role: {
-    type: DataTypes.STRING(20),
+  role_id: {
+    type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 'user', // 'admin', 'user', 'guest'
-  },
-  settings_json: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
+    // Тут НЕ має бути autoIncrement
+  }
 }, {
   tableName: 'Users',
-  timestamps: true,               // Sequelize сам керує createdAt і updatedAt
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
+  timestamps: true
 });
 
 module.exports = User;

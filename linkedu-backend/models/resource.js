@@ -1,11 +1,11 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/Database');
+const sequelize = require('../config/database');
 
 const Resource = sequelize.define('Resource', {
   resource_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+    primaryKey: true,    // ВАЖЛИВО: CamelCase
+    autoIncrement: true
   },
   title: {
     type: DataTypes.STRING(255),
@@ -15,31 +15,19 @@ const Resource = sequelize.define('Resource', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  type: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-    // 'video', 'article', 'course'
-  },
-  status: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-    defaultValue: 'none',
-    // 'none', 'planned', 'learning', 'learned'
+  type_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+    // Тут НЕ має бути autoIncrement
   },
   created_by: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-    // ключ вказує на Users.user_id
-  },
+    allowNull: false
+    // Тут НЕ має бути autoIncrement
+  }
 }, {
   tableName: 'Resources',
-  timestamps: true,
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
+  timestamps: true
 });
 
 module.exports = Resource;
