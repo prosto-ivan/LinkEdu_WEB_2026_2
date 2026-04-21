@@ -2,7 +2,6 @@ const sequelize = require('./config/database');
 const User = require('./models/User');
 const Resource = require('./models/resource');
 
-// 1. Опис зв'язків (Associations)
 // One-to-Many: Адмін створює багато ресурсів
 User.hasMany(Resource, { foreignKey: 'created_by', as: 'createdResources' });
 Resource.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
@@ -10,12 +9,10 @@ Resource.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 async function runLab() {
     try {
         await sequelize.authenticate();
-        console.log('✅ Connected to SQL Server');
+        console.log('✅ Connected ');
         await sequelize.sync({ force: false });
 
-        // --- CRUD  ---
-
-        // 1. INSERT (Створення)
+        // INSERT
         const admin = await User.create({
             username: 'IvanAdmin',
             email: `admin_${Date.now()}@linkedu.ua`,
@@ -31,7 +28,7 @@ async function runLab() {
         });
         console.log('➕ Записи створено');
 
-        // 2. SELECT (Пошук зі зв'язками - Вимога ЛР)
+        // Пошук зі зв'язками
         const adminData = await User.findOne({
             where: { user_id: admin.user_id },
             include: [{ model: Resource, as: 'createdResources' }]
@@ -43,7 +40,7 @@ async function runLab() {
         console.log('🆙 Ресурс оновлено');
 
         // 4. DELETE
-        // await Resource.destroy({ where: { resource_id: res.resource_id } });
+        await Resource.destroy({ where: { resource_id: res.resource_id } });
 
     } catch (err) {
         console.error('❌ Помилка:', err.message);

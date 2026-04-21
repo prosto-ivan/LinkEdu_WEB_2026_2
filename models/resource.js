@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 const Resource = sequelize.define('Resource', {
   resource_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,    // ВАЖЛИВО: CamelCase
+    primaryKey: true, 
     autoIncrement: true
   },
   title: {
@@ -18,12 +18,10 @@ const Resource = sequelize.define('Resource', {
   type_id: {
     type: DataTypes.INTEGER,
     allowNull: false
-    // Тут НЕ має бути autoIncrement
   },
   created_by: {
     type: DataTypes.INTEGER,
     allowNull: false
-    // Тут НЕ має бути autoIncrement
   }
 }, {
   tableName: 'Resources',

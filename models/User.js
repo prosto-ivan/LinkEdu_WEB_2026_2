@@ -4,8 +4,8 @@ const sequelize = require('../config/database');
 const User = sequelize.define('User', {
   user_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,    // ВАЖЛИВО: CamelCase
-    autoIncrement: true  // Тільки один автоінкремент на модель
+    primaryKey: true,
+    autoIncrement: true
   },
   username: {
     type: DataTypes.STRING(50),
@@ -23,7 +23,6 @@ const User = sequelize.define('User', {
   role_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    // Тут НЕ має бути autoIncrement
   }
 }, {
   tableName: 'Users',
