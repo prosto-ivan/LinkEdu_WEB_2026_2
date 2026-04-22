@@ -604,3 +604,76 @@ body.role-admin .guest-only {
         justify-content: center;
     }
 }
+
+/* ===== PROFILE MODAL ===== */
+
+#profile-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+}
+
+/* Контейнер модалки */
+#profile-modal > div {
+    background: var(--card-bg);
+    color: var(--text-primary);
+
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+
+    border-radius: 12px;
+    padding: 20px;
+
+    overflow-y: auto;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Заголовки */
+#profile-modal h2,
+#profile-modal h3 {
+    margin-bottom: 10px;
+}
+
+/* Інпути */
+#profile-modal input {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+
+    border-radius: 6px;
+    border: 1px solid #ccc;
+
+    font-size: 14px;
+}
+
+/* Кнопки */
+#profile-modal button {
+    margin-top: 8px;
+}
+
+/* Повідомлення */
+#profile-message {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Темна тема */
+.dark-theme #profile-modal > div {
+    background: #1e1e1e;
+    color: white;
+}
+
+.dark-theme #profile-modal input {
+    background: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+}

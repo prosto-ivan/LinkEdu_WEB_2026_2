@@ -1,7 +1,4 @@
-/**
- * LinkEdu Hub - Логіка застосунку
- * Виконав: Гаран Іван, гр. ІК-33
- */
+const API_BASE = 'http://localhost:3000/api/auth';
 
 const resources = [
     { id: 1, title: "JavaScript та TypeScript: Повний посібник", type: "course", status: "learning" },
@@ -22,49 +19,331 @@ let state = {
     isDarkTheme: false,
     itemsPerPage: 3,
     visibleCount: 3,
-    currentView: 'catalog' 
+    currentView: 'catalog'
 };
 
-// 1. Об'єкт з SVG іконками для різних типів контенту
 const icons = {
     video: `<svg viewBox="0 0 24 24" class="card-icon" style="stroke: var(--color-video)"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
     article: `<svg viewBox="0 0 24 24" class="card-icon" style="stroke: var(--color-article)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
     course: `<svg viewBox="0 0 24 24" class="card-icon" style="stroke: var(--color-course)"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>`
 };
 
-// Допоміжна функція для отримання тексту статусу
 function getStatusLabel(status) {
     const labels = {
-        'none': '+ Додати',
-        'planned': 'Планую',
-        'learning': 'Вчу',
-        'learned': 'Вивчено'
+        none: '+ Додати',
+        planned: 'Планую',
+        learning: 'Вчу',
+        learned: 'Вивчено'
     };
     return labels[status] || '+ Додати';
 }
 
-// Авторизація та вихід
-function login(role) {
-    state.currentUserRole = role;
+function showMessage(message, targetId = 'auth-message', isError = false) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    el.style.color = isError ? 'crimson' : 'green';
+    el.innerText = message;
+}
+
+function showAuthTab(tab) {
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('forgot-form').style.display = tab === 'forgot' ? 'block' : 'none';
+    showMessage('', 'auth-message');
+}
+
+async function registerUser() {
+    try {
+        const body = {
+            username: document.getElementById('register-username').value.trim(),
+            email: document.getElementById('register-email').value.trim(),
+            password: document.getElementById('register-password').value,
+            confirmPassword: document.getElementById('register-confirm-password').value,
+            role_id: Number(document.getElementById('register-role').value)
+        };
+
+        const res = await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка реєстрації', 'auth-message', true);
+        }
+
+        showMessage(`Реєстрація успішна. Verification token: ${data.verificationToken}`);
+        showAuthTab('login');
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'auth-message', true);
+    }
+}
+
+async function loginUser() {
+    try {
+        const body = {
+            email: document.getElementById('login-email').value.trim(),
+            password: document.getElementById('login-password').value
+        };
+
+        const res = await fetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка логіну', 'auth-message', true);
+        }
+
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+
+        await enterApp();
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'auth-message', true);
+    }
+}
+
+async function enterApp() {
+    const profile = await fetchProfile();
+    if (!profile) return;
+
     document.getElementById('auth-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'flex';
-    document.body.className = `role-${role} ${state.isDarkTheme ? 'dark-theme' : ''}`;
-    
-    document.getElementById('display-role').innerText = 
-        { 'admin': 'Адмін', 'user': 'Користувач', 'guest': 'Гість' }[role];
+
+    const roleMap = {
+        1: 'admin',
+        2: 'user'
+    };
+
+    state.currentUserRole = roleMap[profile.role_id] || 'guest';
+
+    document.body.className = `role-${state.currentUserRole} ${state.isDarkTheme ? 'dark-theme' : ''}`;
+    document.getElementById('display-role').innerText =
+        state.currentUserRole === 'admin' ? 'Адмін' :
+        state.currentUserRole === 'user' ? 'Користувач' : 'Гість';
 
     renderCards();
 }
 
-function logout() {
+async function fetchProfile() {
+    try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) return null;
+
+        const res = await fetch(`${API_BASE}/profile`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return null;
+        }
+
+        return data.user;
+    } catch (error) {
+        return null;
+    }
+}
+
+async function loadProfile() {
+    const profile = await fetchProfile();
+    if (!profile) {
+        showMessage('Не вдалося завантажити профіль', 'auth-message', true);
+        return;
+    }
+
+    document.getElementById('profile-info').innerHTML = `
+        <p><strong>ID:</strong> ${profile.user_id}</p>
+        <p><strong>Ім'я:</strong> ${profile.username}</p>
+        <p><strong>Email:</strong> ${profile.email}</p>
+        <p><strong>Роль:</strong> ${profile.role_id === 1 ? 'Адміністратор' : 'Користувач'}</p>
+        <p><strong>Email підтверджено:</strong> ${profile.is_email_confirmed ? 'Так' : 'Ні'}</p>
+    `;
+
+    document.getElementById('profile-username').value = profile.username || '';
+    document.getElementById('profile-email').value = profile.email || '';
+    document.getElementById('profile-modal').style.display = 'flex';
+    showMessage('', 'profile-message');
+}
+
+function closeProfileModal() {
+    document.getElementById('profile-modal').style.display = 'none';
+}
+
+async function updateProfile() {
+    try {
+        const token = localStorage.getItem('accessToken');
+
+        const body = {
+            username: document.getElementById('profile-username').value.trim(),
+            email: document.getElementById('profile-email').value.trim()
+        };
+
+        const res = await fetch(`${API_BASE}/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка оновлення профілю', 'profile-message', true);
+        }
+
+        showMessage(data.message, 'profile-message');
+        await loadProfile();
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'profile-message', true);
+    }
+}
+
+async function changePassword() {
+    try {
+        const token = localStorage.getItem('accessToken');
+
+        const body = {
+            oldPassword: document.getElementById('old-password').value,
+            newPassword: document.getElementById('new-password').value,
+            confirmNewPassword: document.getElementById('confirm-new-password').value
+        };
+
+        const res = await fetch(`${API_BASE}/change-password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка зміни пароля', 'profile-message', true);
+        }
+
+        showMessage(data.message, 'profile-message');
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'profile-message', true);
+    }
+}
+
+async function verifyEmail() {
+    try {
+        const token = document.getElementById('verify-email-token').value.trim();
+
+        const res = await fetch(`${API_BASE}/verify-email?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка підтвердження email', 'profile-message', true);
+        }
+
+        showMessage(data.message, 'profile-message');
+        await loadProfile();
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'profile-message', true);
+    }
+}
+
+async function forgotPassword() {
+    try {
+        const body = {
+            email: document.getElementById('forgot-email').value.trim()
+        };
+
+        const res = await fetch(`${API_BASE}/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка forgot password', 'auth-message', true);
+        }
+
+        showMessage(`Reset token: ${data.resetToken}`);
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'auth-message', true);
+    }
+}
+
+async function resetPassword() {
+    try {
+        const body = {
+            token: document.getElementById('reset-token').value.trim(),
+            newPassword: document.getElementById('reset-new-password').value,
+            confirmNewPassword: document.getElementById('reset-confirm-password').value
+        };
+
+        const res = await fetch(`${API_BASE}/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            return showMessage(data.message || 'Помилка reset password', 'auth-message', true);
+        }
+
+        showMessage(data.message);
+        showAuthTab('login');
+    } catch (error) {
+        showMessage('Помилка з’єднання із сервером', 'auth-message', true);
+    }
+}
+
+async function logoutUser() {
+    try {
+        const token = localStorage.getItem('accessToken');
+
+        await fetch(`${API_BASE}/logout`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+    }
+
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+
     state.currentUserRole = 'guest';
     state.recentVisits = [];
+
+    
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeProfileModal();
+        }
+    });
+
     document.getElementById('auth-page').style.display = 'flex';
     document.getElementById('main-app').style.display = 'none';
     updateRecentListUI();
+    closeProfileModal();
+    showAuthTab('login');
 }
 
-// Перемикання режимів (Каталог / Кабінет)
 function switchView(viewName) {
     state.currentView = viewName;
     state.visibleCount = state.itemsPerPage;
@@ -73,11 +352,10 @@ function switchView(viewName) {
     renderCards();
 }
 
-// метод рендерингу карток
 function renderCards() {
-    const grid = document.getElementById('content-grid'); 
+    const grid = document.getElementById('content-grid');
     if (!grid) return;
-    
+
     grid.innerHTML = '';
 
     const filteredData = resources.filter(item => {
@@ -96,8 +374,8 @@ function renderCards() {
     filteredData.slice(0, state.visibleCount).forEach(item => {
         const card = document.createElement('div');
         card.className = `card status-${item.status} resource-card`;
-        card.setAttribute('data-type', item.type); 
-        
+        card.setAttribute('data-type', item.type);
+
         const iconSvg = icons[item.type] || icons.article;
 
         let actions = '';
@@ -109,14 +387,12 @@ function renderCards() {
 
         card.innerHTML = `
             <div class="card-thumbnail-svg">${iconSvg}</div>
-            
             <div class="card-body">
                 <div class="card-meta">
                     <span class="badge type-${item.type}">${item.type.toUpperCase()}</span>
                 </div>
                 <h3 class="card-title" onclick="trackVisit(${item.id})">${item.title}</h3>
             </div>
-            
             <div class="card-actions">${actions}</div>
         `;
         grid.appendChild(card);
@@ -125,7 +401,6 @@ function renderCards() {
     renderPagination(state.visibleCount, filteredData.length);
 }
 
-// Пагінація
 function renderPagination(visible, total) {
     const container = document.getElementById('pagination-controls');
     container.innerHTML = visible < total ? `<button class="btn-load-more" onclick="loadMore()">Показати ще ⬇️</button>` : '';
@@ -136,7 +411,6 @@ function loadMore() {
     renderCards();
 }
 
-// Фільтри та пошук
 function handleSearch(e) {
     state.searchQuery = e.target.value.toLowerCase();
     state.visibleCount = state.itemsPerPage;
@@ -150,7 +424,6 @@ function setFilter(type) {
     renderCards();
 }
 
-// Бізнес-логіка
 function cycleStatus(id) {
     const item = resources.find(r => r.id === id);
     const sequence = ['none', 'planned', 'learning', 'learned'];
@@ -171,9 +444,13 @@ function trackVisit(id) {
 
 function updateRecentListUI() {
     const list = document.getElementById('recent-list');
-    list.innerHTML = state.recentVisits.length ? state.recentVisits.map(v => 
-        `<li><a href="#" class="history-link" onclick="trackVisit(${v.id}); return false;">🔗 ${v.title}</a></li>`
-    ).join('') : '<li class="empty-text">Історія порожня</li>';
+    if (!list) return;
+
+    list.innerHTML = state.recentVisits.length
+        ? state.recentVisits.map(v =>
+            `<li><a href="#" class="history-link" onclick="trackVisit(${v.id}); return false;">🔗 ${v.title}</a></li>`
+        ).join('')
+        : '<li class="empty-text">Історія порожня</li>';
 }
 
 function toggleTheme() {
@@ -182,4 +459,23 @@ function toggleTheme() {
     localStorage.setItem('theme', state.isDarkTheme ? 'dark' : 'light');
 }
 
-if (localStorage.getItem('theme') === 'dark') toggleTheme();
+async function tryAutoLogin() {
+    if (localStorage.getItem('theme') === 'dark') {
+        toggleTheme();
+    }
+
+    const profile = await fetchProfile();
+    if (profile) {
+        await enterApp();
+    } else {
+        showAuthTab('login');
+    }
+}
+
+    document.getElementById('profile-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeProfileModal();
+        }
+    });
+
+tryAutoLogin();

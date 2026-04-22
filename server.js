@@ -1,52 +1,46 @@
+const express = require('express');
+const cors = require('cors');
 const sequelize = require('./config/database');
-const User = require('./models/User');
-const Resource = require('./models/resource');
+const authRoutes = require('./routes/authRoutes');
 
-// One-to-Many: Адмін створює багато ресурсів
+const User = require('./models/User');
+const Resource = require('./models/Resource');
+
+const app = express();
+const PORT = 3000;
+
+// Зв'язки
 User.hasMany(Resource, { foreignKey: 'created_by', as: 'createdResources' });
 Resource.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
-async function runLab() {
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// Маршрути
+app.use('/api/auth', authRoutes);
+
+// Тестовий маршрут
+app.get('/', (req, res) => {
+    res.send('REST API працює');
+});
+
+// Запуск сервера
+async function startServer() {
     try {
         await sequelize.authenticate();
-        console.log('✅ Connected ');
-        await sequelize.sync({ force: false });
+        console.log('✅ Підключення до БД успішне');
 
-        // INSERT
-        const admin = await User.create({
-            username: 'IvanAdmin',
-            email: `admin_${Date.now()}@linkedu.ua`,
-            password_hash: 'hash123',
-            role_id: 1 // admin
+        await sequelize.sync({ alter: false });
+        console.log('✅ Таблиці синхронізовано');
+
+        app.listen(PORT, () => {
+            console.log(`✅ Сервер запущено: http://localhost:${PORT}`);
         });
-
-        const res = await Resource.create({
-            title: 'Advanced SQL Server Guide',
-            url: 'https://microsoft.com',
-            type_id: 2, // article
-            created_by: admin.user_id
-        });
-        console.log('➕ Записи створено');
-
-        // Пошук зі зв'язками
-        const adminData = await User.findOne({
-            where: { user_id: admin.user_id },
-            include: [{ model: Resource, as: 'createdResources' }]
-        });
-        console.log(`📖 У адміна знайдено ресурсів: ${adminData.createdResources.length}`);
-
-        // 3. UPDATE
-        await Resource.update({ title: 'SQL Server Deep Dive' }, { where: { resource_id: res.resource_id } });
-        console.log('🆙 Ресурс оновлено');
-
-        // 4. DELETE
-        await Resource.destroy({ where: { resource_id: res.resource_id } });
-
-    } catch (err) {
-        console.error('❌ Помилка:', err.message);
-    } finally {
-        await sequelize.close();
+    } catch (error) {
+        console.error('❌ Помилка запуску сервера:', error);
     }
 }
 
-runLab();
+startServer();

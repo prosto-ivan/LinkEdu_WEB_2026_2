@@ -15,7 +15,7 @@ const sequelize = new Sequelize(
         connectTimeout: 30000,
       }
     },
-    logging: console.log,
+    logging: false,
   }
 );
 

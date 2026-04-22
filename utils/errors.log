@@ -1,0 +1,41 @@
+[2026-04-21T21:38:37.005Z] [refresh] JsonWebTokenError: jwt malformed
+    at module.exports [as verify] (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\jsonwebtoken\verify.js:70:17)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:144:29
+    at Layer.handleRequest (C:\Users\vanya\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\vanya\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\vanya\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\vanya\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\vanya\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\vanya\node_modules\router\index.js:295:15
+    at processParams (C:\Users\vanya\node_modules\router\index.js:582:12)
+    at next (C:\Users\vanya\node_modules\router\index.js:291:5)
+[2026-04-22T21:29:40.277Z] [refresh] JsonWebTokenError: invalid signature
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\jsonwebtoken\verify.js:171:19
+    at getSecret (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:144:29
+    at Layer.handleRequest (C:\Users\vanya\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\vanya\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\vanya\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\vanya\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\vanya\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\vanya\node_modules\router\index.js:295:15
+[2026-04-22T21:47:48.868Z] [delete-user] Error
+    at Query.run (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\mssql\query.js:107:25)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MSSqlQueryInterface.select (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\abstract\query-interface.js:407:12)
+    at async User.findAll (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:1140:21)
+    at async User.findOne (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:1240:12)
+    at async C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:308:22
+[2026-04-22T21:48:33.049Z] [refresh] JsonWebTokenError: jwt malformed
+    at module.exports [as verify] (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\jsonwebtoken\verify.js:70:17)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:144:29
+    at Layer.handleRequest (C:\Users\vanya\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\vanya\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\vanya\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\vanya\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\vanya\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\vanya\node_modules\router\index.js:295:15
+    at processParams (C:\Users\vanya\node_modules\router\index.js:582:12)
+    at next (C:\Users\vanya\node_modules\router\index.js:291:5)

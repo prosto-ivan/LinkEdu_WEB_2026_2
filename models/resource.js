@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 const Resource = sequelize.define('Resource', {
   resource_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true, 
+    primaryKey: true,
     autoIncrement: true
   },
   title: {
