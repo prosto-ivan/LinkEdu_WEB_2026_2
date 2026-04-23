@@ -253,12 +253,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    transition: 0.2s;
+    transition: all 0.2s ease;
 }
 
 .card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    cursor: pointer;
 }
 
 .card.status-learning {
@@ -674,5 +675,137 @@ body.role-admin .guest-only {
 .dark-theme #profile-modal input {
     background: #2a2a2a;
     color: white;
+    border: 1px solid #444;
+}
+
+/* ===== UNIVERSAL MODAL ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-card {
+    background: #ffffff;
+    color: #111111;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-card-wide {
+    max-width: 800px;
+}
+
+.modal-message {
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.modal-close-btn {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* ===== TABLES ===== */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.users-table thead tr {
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
+.users-table th,
+.users-table td {
+    padding: 10px;
+}
+
+.users-table tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.empty-cell {
+    padding: 15px;
+    text-align: center;
+}
+
+/* ===== STATUS TEXT ===== */
+.status-confirmed {
+    color: green;
+    font-weight: bold;
+}
+
+.status-unconfirmed {
+    color: orange;
+}
+
+/* ===== DARK THEME ===== */
+body.dark-theme .modal-card {
+    background: #1e1e1e;
+    color: #ffffff;
+}
+
+body.dark-theme .users-table thead tr {
+    border-bottom: 1px solid #444;
+}
+
+body.dark-theme .users-table tbody tr {
+    border-bottom: 1px solid #333;
+}
+
+/* ===== RESOURCE FORM ===== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: #111111;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.modal-actions button {
+    flex: 1;
+}
+
+body.dark-theme .modal-input {
+    background: #2a2a2a;
+    color: #ffffff;
     border: 1px solid #444;
 }

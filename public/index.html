@@ -47,10 +47,7 @@
                 <input id="register-email" type="email" placeholder="Email" style="width:100%; padding:10px; margin:8px 0;">
                 <input id="register-password" type="password" placeholder="Пароль" style="width:100%; padding:10px; margin:8px 0;">
                 <input id="register-confirm-password" type="password" placeholder="Підтвердження пароля" style="width:100%; padding:10px; margin:8px 0;">
-                <select id="register-role" style="width:100%; padding:10px; margin:8px 0;">
-                    <option value="2">Користувач</option>
-                    <option value="1">Адміністратор</option>
-                </select>
+                <select id="register-role" style="width:100%; padding:10px; margin:8px 0;"></select>
                 <button class="btn-role" style="width:100%; margin-top:10px;" onclick="registerUser()">Зареєструватися</button>
             </div>
 
@@ -81,6 +78,7 @@
 
             <div class="nav-controls">
                 <span id="display-role" class="role-badge"></span>
+                <button class="btn-theme admin-only" onclick="openUsersModal()">Користувачі</button>
                 <button onclick="loadProfile()" class="btn-theme">Профіль</button>
                 <button onclick="toggleTheme()" class="btn-theme">🌓 Тема</button>
                 <button onclick="logoutUser()" class="btn-logout">Вийти</button>
@@ -89,13 +87,8 @@
 
         <header class="controls-section">
             <input type="text" id="searchInput" placeholder="Пошук за назвою..." oninput="handleSearch(event)">
-            <div class="filter-group">
-                <button class="filter-btn active" data-type="all" onclick="setFilter('all')">УСЕ</button>
-                <button class="filter-btn" data-type="video" onclick="setFilter('video')">ВІДЕО</button>
-                <button class="filter-btn" data-type="article" onclick="setFilter('article')">СТАТТІ</button>
-                <button class="filter-btn" data-type="course" onclick="setFilter('course')">КУРСИ</button>
-            </div>
-            <button class="btn-add admin-only" onclick="alert('Додавання ресурсу')">+ Додати ресурс</button>
+            <div id="resource-filters" class="filter-group"></div>
+            <button class="btn-add admin-only" onclick="openResourceModal()">+ Додати ресурс</button>
         </header>
 
         <main class="layout-wrapper">
@@ -176,6 +169,66 @@
             <button class="btn-role" style="width:100%; margin-top:10px;" onclick="verifyEmail()">Підтвердити email</button>
 
             <div id="profile-message" style="margin-top:15px; color:green;"></div>
+        </div>
+    </div>
+
+    <div id="users-modal" class="modal-overlay">
+        <div class="modal-card modal-card-wide">
+            <h2>Керування користувачами</h2>
+
+            <div id="users-message" class="modal-message"></div>
+
+            <div class="table-wrapper">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ім'я</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                            <th>Пошта</th>
+                            <th>Дія</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="6" class="empty-cell">Немає даних</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn-logout modal-close-btn" onclick="closeUsersModal()">Закрити</button>
+        </div>
+    </div>
+
+    <div id="resource-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 id="resource-modal-title">Додати ресурс</h2>
+
+            <div id="resource-message" class="modal-message"></div>
+
+            <input type="hidden" id="resource-id">
+
+            <div class="form-group">
+                <label for="resource-title">Назва ресурсу</label>
+                <input id="resource-title" type="text" class="modal-input" placeholder="Введіть назву">
+            </div>
+
+            <div class="form-group">
+                <label for="resource-url">URL</label>
+                <input id="resource-url" type="text" class="modal-input" placeholder="https://example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="resource-type">Тип ресурсу</label>
+                <select id="resource-type" class="modal-input"></select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-role" onclick="saveResource()">Зберегти</button>
+                <button class="btn-logout" onclick="closeResourceModal()">Скасувати</button>
+            </div>
         </div>
     </div>
 

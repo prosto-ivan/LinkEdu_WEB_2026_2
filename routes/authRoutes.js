@@ -452,4 +452,29 @@ router.get('/verify-email', async (req, res) => {
     }
 });
 
+// GET ALL USERS (ADMIN ONLY)
+router.get('/users', authMiddleware, roleMiddleware(1), async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: [
+                'user_id',
+                'username',
+                'email',
+                'role_id',
+                'is_email_confirmed',
+                'createdAt'
+            ],
+            order: [['user_id', 'ASC']]
+        });
+
+        return res.json({
+            message: 'Список користувачів успішно отримано',
+            users
+        });
+    } catch (error) {
+        logError(error, 'get-users');
+        return res.status(500).json({ message: 'Помилка сервера' });
+    }
+});
+
 module.exports = router;
