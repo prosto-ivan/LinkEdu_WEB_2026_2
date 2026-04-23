@@ -386,7 +386,6 @@ body {
     background: rgba(0, 123, 255, 0.05); /* Легкий підсвіт при наведенні */
 }
 
-/* Мета-дані (Бедж та дата) */
 .card-meta {
     display: flex;
     justify-content: space-between;
@@ -622,8 +621,8 @@ body.role-admin .guest-only {
 
 /* Контейнер модалки */
 #profile-modal > div {
-    background: var(--card-bg);
-    color: var(--text-primary);
+    background: white; 
+    color: #111;       
 
     width: 100%;
     max-width: 500px;

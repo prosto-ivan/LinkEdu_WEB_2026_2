@@ -166,9 +166,13 @@ async function loadProfile() {
         <p><strong>Ім'я:</strong> ${profile.username}</p>
         <p><strong>Email:</strong> ${profile.email}</p>
         <p><strong>Роль:</strong> ${profile.role_id === 1 ? 'Адміністратор' : 'Користувач'}</p>
-        <p><strong>Email підтверджено:</strong> ${profile.is_email_confirmed ? 'Так' : 'Ні'}</p>
+        <p>
+            <strong>Email:</strong> 
+            ${profile.is_email_confirmed 
+                ? '<span style="color:green; font-weight:bold;">✔ Підтверджено</span>' 
+                : '<span style="color:orange;">Не підтверджено</span>'}
+        </p>
     `;
-
     document.getElementById('profile-username').value = profile.username || '';
     document.getElementById('profile-email').value = profile.email || '';
     document.getElementById('profile-modal').style.display = 'flex';
@@ -198,13 +202,17 @@ async function updateProfile() {
         });
 
         const data = await res.json();
-
+        console.log(data);
         if (!res.ok) {
             return showMessage(data.message || 'Помилка оновлення профілю', 'profile-message', true);
         }
 
-        showMessage(data.message, 'profile-message');
         await loadProfile();
+
+        let message = data.message;
+
+
+        showMessage(message, 'profile-message');
     } catch (error) {
         showMessage('Помилка з’єднання із сервером', 'profile-message', true);
     }
@@ -244,8 +252,8 @@ async function changePassword() {
 async function verifyEmail() {
     try {
         const token = document.getElementById('verify-email-token').value.trim();
-
-        const res = await fetch(`${API_BASE}/verify-email?token=${encodeURIComponent(token)}`);
+        const email = document.getElementById('profile-email').value;
+        const res = await fetch(`${API_BASE}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
         const data = await res.json();
 
         if (!res.ok) {

@@ -237,8 +237,12 @@ router.put('/profile', authMiddleware, async (req, res) => {
             if (existingEmail) {
                 return res.status(400).json({ message: 'Цей email уже використовується' });
             }
+
+            const newVerificationToken = crypto.randomBytes(32).toString('hex');
+
             user.email = email;
             user.is_email_confirmed = false;
+            user.email_verification_token = newVerificationToken;
         }
 
         if (username) {
@@ -246,9 +250,10 @@ router.put('/profile', authMiddleware, async (req, res) => {
         }
 
         await user.save();
-
+   
         return res.json({
             message: 'Профіль успішно оновлено',
+            verificationToken: user.is_email_confirmed ? null : user.email_verification_token,
             user: {
                 user_id: user.user_id,
                 username: user.username,
@@ -403,21 +408,33 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// VERIFY EMAIL
 router.get('/verify-email', async (req, res) => {
     try {
-        const { token } = req.query;
+        const { token, email } = req.query;
 
-        if (!token) {
-            return res.status(400).json({ message: 'Токен підтвердження відсутній' });
+        if (!email) {
+            return res.status(400).json({ message: 'Email відсутній' });
         }
 
-        const user = await User.findOne({
-            where: { email_verification_token: token }
-        });
+        const user = await User.findOne({ where: { email } });
 
         if (!user) {
-            return res.status(400).json({ message: 'Недійсний токен підтвердження email' });
+            return res.status(404).json({ message: 'Користувача не знайдено' });
+        }
+
+        // 🔥 ГОЛОВНА ЗМІНА
+        if (user.is_email_confirmed) {
+            return res.json({ message: 'Вже підтверджено' });
+        }
+
+        if (!token) {
+            return res.status(400).json({ message: 'Токен відсутній' });
+        }
+
+        if (user.email_verification_token !== token) {
+            return res.status(400).json({
+                message: 'Недійсний токен підтвердження email'
+            });
         }
 
         await user.update({
@@ -428,6 +445,7 @@ router.get('/verify-email', async (req, res) => {
         return res.json({
             message: 'Email успішно підтверджено'
         });
+
     } catch (error) {
         logError(error, 'verify-email');
         return res.status(500).json({ message: 'Помилка сервера' });
