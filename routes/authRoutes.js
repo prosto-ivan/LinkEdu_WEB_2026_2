@@ -1,4 +1,5 @@
 const express = require('express');
+const passport = require('passport');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -10,6 +11,11 @@ const {
     generateRefreshToken,
     REFRESH_SECRET
 } = require('../utils/tokenUtils');
+const {
+    sendVerificationEmail,
+    sendPasswordResetEmail
+} = require('../services/mailService');
+
 const logError = require('../utils/logger');
 
 const router = express.Router();
@@ -56,9 +62,14 @@ router.post('/register', async (req, res) => {
             is_email_confirmed: false
         });
 
+        const mailResult = await sendVerificationEmail(email, emailVerificationToken);
+
         return res.status(201).json({
-            message: 'Користувача успішно зареєстровано',
-            verificationToken: emailVerificationToken,
+            message: mailResult.sent
+                ? 'Користувача успішно зареєстровано. Токен підтвердження надіслано на email.'
+                : 'Користувача успішно зареєстровано. Email не надіслано, використайте токен з відповіді.',
+            emailSent: mailResult.sent,
+            verificationToken: mailResult.sent ? null : emailVerificationToken,
             user: {
                 user_id: newUser.user_id,
                 username: newUser.username,
@@ -226,6 +237,8 @@ router.put('/profile', authMiddleware, async (req, res) => {
     try {
         const { username, email } = req.body;
 
+        let emailChanged = false;
+
         const user = await User.findOne({ where: { user_id: req.user.user_id } });
 
         if (!user) {
@@ -243,17 +256,33 @@ router.put('/profile', authMiddleware, async (req, res) => {
             user.email = email;
             user.is_email_confirmed = false;
             user.email_verification_token = newVerificationToken;
+            emailChanged = true;
         }
 
         if (username) {
             user.username = username;
         }
-
+        
         await user.save();
+
+        let mailResult = { sent: false };
+
+        if (emailChanged) {
+            mailResult = await sendVerificationEmail(user.email, user.email_verification_token);
+        }
    
         return res.json({
-            message: 'Профіль успішно оновлено',
-            verificationToken: user.is_email_confirmed ? null : user.email_verification_token,
+            message: emailChanged
+                ? (
+                    mailResult.sent
+                        ? 'Профіль успішно оновлено. Токен підтвердження надіслано на новий email.'
+                        : 'Профіль успішно оновлено. Email не надіслано, використайте токен з відповіді.'
+                )
+                : 'Профіль успішно оновлено',
+            emailSent: mailResult.sent,
+            verificationToken: user.is_email_confirmed || mailResult.sent
+                ? null
+                : user.email_verification_token,
             user: {
                 user_id: user.user_id,
                 username: user.username,
@@ -267,6 +296,47 @@ router.put('/profile', authMiddleware, async (req, res) => {
         return res.status(500).json({ message: 'Помилка сервера' });
     }
 });
+
+router.get('/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+router.get('/google/callback',
+    passport.authenticate('google', {
+        session: false,
+        failureRedirect: '/'
+    }),
+    async (req, res) => {
+        try {
+            const user = req.user;
+
+            if (!user) {
+                return res.redirect(
+                    `${process.env.FRONTEND_URL || 'http://localhost:3000'}?oauthError=google_auth_failed`
+                );
+            }
+
+            const accessToken = generateAccessToken(user);
+            const refreshToken = generateRefreshToken(user);
+
+            await user.update({
+                refresh_token: refreshToken
+            });
+
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+            return res.redirect(
+                `${frontendUrl}?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}`
+            );
+        } catch (error) {
+            logError(error, 'google-callback');
+
+            return res.redirect(
+                `${process.env.FRONTEND_URL || 'http://localhost:3000'}?oauthError=server_error`
+            );
+        }
+    }
+);
 
 // CHANGE PASSWORD
 router.put('/change-password', authMiddleware, async (req, res) => {
@@ -353,9 +423,14 @@ router.post('/forgot-password', async (req, res) => {
             reset_password_expires: expires
         });
 
+        const mailResult = await sendPasswordResetEmail(email, resetToken);
+
         return res.json({
-            message: 'Токен для скидання пароля згенеровано',
-            resetToken,
+            message: mailResult.sent
+                ? 'Токен для скидання пароля надіслано на email.'
+                : 'Email не надіслано, використайте токен з відповіді.',
+            emailSent: mailResult.sent,
+            resetToken: mailResult.sent ? null : resetToken,
             expiresAt: expires
         });
     } catch (error) {

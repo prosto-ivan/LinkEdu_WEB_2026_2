@@ -1,11 +1,23 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
+const morgan = require('morgan');
+const fs = require('fs');
+const path = require('path');
+const passport = require('passport');
+require('./config/passport');
 
 const authRoutes = require('./routes/authRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
 const userResourceRoutes = require('./routes/userResourceRoutes');
 const metaRoutes = require('./routes/metaRoutes');
+const performanceMiddleware = require('./middleware/performanceMiddleware');
+const errorMiddleware = require('./middleware/errorMiddleware');
+const uploadRoutes = require('./routes/uploadRoutes');
+const statusRoutes = require('./routes/statusRoutes');
+const { logger } = require('./utils/logger');
 
 const Role = require('./models/Role');
 const ResourceType = require('./models/ResourceType');
@@ -15,6 +27,20 @@ const UserResource = require('./models/UserResource');
 
 const app = express();
 const PORT = 3000;
+
+
+if (!fs.existsSync('logs')) {
+    fs.mkdirSync('logs');
+}
+
+if (!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+}
+
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'logs', 'access.log'),
+    { flags: 'a' }
+);
 
 // Зв'язки
 
@@ -51,19 +77,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+app.use(morgan('dev'));
+app.use(morgan('combined', { stream: accessLogStream }));
+
+app.use(performanceMiddleware);
+
+app.use(passport.initialize());
+
 // Маршрути
 app.use('/api/auth', authRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/user-resources', userResourceRoutes);
 app.use('/api/meta', metaRoutes);
+app.use('/api', uploadRoutes);
+app.use('/api', statusRoutes);
 
-// Тестовий маршрут
-app.get('/', (req, res) => {
-    res.send('REST API працює');
-});
-
-// Запуск сервера
 async function startServer() {
+    logger.info('Server started on port 3000');
     try {
         await sequelize.authenticate();
         console.log('✅ Підключення до БД успішне');
@@ -72,11 +102,13 @@ async function startServer() {
         console.log('✅ Таблиці синхронізовано');
 
         app.listen(PORT, () => {
+            logger.info('[logger] Server started on port 3000');
             console.log(`✅ Сервер запущено: http://localhost:${PORT}`);
         });
     } catch (error) {
         console.error('❌ Помилка запуску сервера:', error);
     }
 }
+app.use(errorMiddleware);
 
 startServer();

@@ -18,6 +18,11 @@ const User = sequelize.define('User', {
     allowNull: false,
     unique: true,
   },
+  
+  google_id: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
 
   password_hash: {
     type: DataTypes.STRING(255),

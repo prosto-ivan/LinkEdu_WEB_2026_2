@@ -5009,3 +5009,31 @@
     at async MSSqlQueryInterface.delete (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\abstract\query-interface.js:393:12)
     at async model.destroy (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:2627:16)
     at async C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:324:9
+[2026-05-13T15:07:11.843Z] [delete-user] Error
+    at Query.run (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\mssql\query.js:107:25)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MSSqlQueryInterface.delete (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\abstract\query-interface.js:393:12)
+    at async model.destroy (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:2627:16)
+    at async C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:352:9
+[2026-05-13T15:07:13.768Z] [delete-user] Error
+    at Query.run (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\mssql\query.js:107:25)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MSSqlQueryInterface.delete (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\abstract\query-interface.js:393:12)
+    at async model.destroy (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:2627:16)
+    at async C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:352:9
+[2026-05-13T15:07:15.478Z] [delete-user] Error
+    at Query.run (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\mssql\query.js:107:25)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MSSqlQueryInterface.delete (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\abstract\query-interface.js:393:12)
+    at async model.destroy (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:2627:16)
+    at async C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:352:9
+[2026-05-13T17:31:47.155Z] [delete-user] Error
+    at Query.run (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\mssql\query.js:107:25)
+    at C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async MSSqlQueryInterface.delete (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\dialects\abstract\query-interface.js:393:12)
+    at async model.destroy (C:\Users\vanya\Desktop\study_2026_2\WEB\project\node_modules\sequelize\lib\model.js:2627:16)
+    at async C:\Users\vanya\Desktop\study_2026_2\WEB\project\routes\authRoutes.js:394:9

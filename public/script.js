@@ -142,16 +142,7 @@ function translateResourceType(typeName) {
 
 async function loadResources() {
     try {
-        const res = await fetch('http://localhost:3000/api/resources');
-        const data = await res.json();
-
-        if (!res.ok) {
-            console.error('Помилка завантаження ресурсів:', data.message);
-            resources = [];
-            renderCards();
-            return;
-        }
-
+        const data = await request(API.resources);
         const statusMap = await loadUserResourceStatuses();
 
         resources = data.resources.map(item => ({
@@ -164,13 +155,12 @@ async function loadResources() {
             created_by: item.created_by,
             creator: item.creator || null
         }));
-
-        renderCards();
     } catch (error) {
-        console.error('Помилка з’єднання при завантаженні ресурсів:', error);
+        console.error('Помилка завантаження ресурсів:', error.message);
         resources = [];
-        renderCards();
     }
+
+    renderCards();
 }
 
 function getStatusLabel(status) {
@@ -211,7 +201,12 @@ async function registerUser() {
             })
         });
 
-        showMessage(`Реєстрація успішна. Verification token: ${data.verificationToken}`);
+        if (data.emailSent) {
+            showMessage(data.message);
+        } else {
+            showMessage(`${data.message} Verification token: ${data.verificationToken}`);
+        }
+
         showAuthTab('login');
     } catch (error) {
         showMessage(error.message, 'auth-message', true);
@@ -231,6 +226,7 @@ async function loginUser() {
 
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
+
         await enterApp();
     } catch (error) {
         showMessage(error.message, 'auth-message', true);
@@ -350,19 +346,17 @@ async function changePassword() {
 
 async function verifyEmail() {
     try {
-        const token = document.getElementById('verify-email-token').value.trim();
-        const email = document.getElementById('profile-email').value;
-        const res = await fetch(`${API.auth}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
-        const data = await res.json();
+        const token = getValue('verify-email-token');
+        const email = getValue('profile-email');
 
-        if (!res.ok) {
-            return showMessage(data.message || 'Помилка підтвердження email', 'profile-message', true);
-        }
+        const data = await request(
+            `${API.auth}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
+        );
 
         showMessage(data.message, 'profile-message');
         await loadProfile();
     } catch (error) {
-        showMessage('Помилка з’єднання із сервером', 'profile-message', true);
+        showMessage(error.message || 'Помилка підтвердження email', 'profile-message', true);
     }
 }
 
@@ -374,9 +368,38 @@ async function forgotPassword() {
             body: JSON.stringify({ email: getValue('forgot-email') })
         });
 
-        showMessage(`Reset token: ${data.resetToken}`);
+        if (data.emailSent) {
+            showMessage(data.message);
+        } else {
+            showMessage(`${data.message} Reset token: ${data.resetToken}`);
+        }
     } catch (error) {
         showMessage(error.message, 'auth-message', true);
+    }
+}
+
+function loginWithGoogle() {
+    window.location.href = `${API.auth}/google`;
+}
+
+function handleOAuthRedirect() {
+    const params = new URLSearchParams(window.location.search);
+
+    const accessToken = params.get('accessToken');
+    const refreshToken = params.get('refreshToken');
+    const oauthError = params.get('oauthError');
+
+    if (oauthError) {
+        showMessage('Помилка входу через Google', 'auth-message', true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+    }
+
+    if (accessToken && refreshToken) {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
@@ -417,14 +440,6 @@ async function logoutUser() {
 
     state.currentUserRole = 'guest';
     state.recentVisits = [];
-
-    
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeProfileModal();
-        }
-    });
 
     document.getElementById('auth-page').style.display = 'flex';
     document.getElementById('main-app').style.display = 'none';
@@ -555,30 +570,18 @@ async function cycleStatus(id) {
     const newStatus = sequence[(sequence.indexOf(item.status) + 1) % sequence.length];
 
     try {
-        const token = localStorage.getItem('accessToken');
-
-        const res = await fetch(`http://localhost:3000/api/user-resources/${id}`, {
+        await request(`${API.userResources}/${id}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
+            headers: authHeaders(true),
             body: JSON.stringify({ status: newStatus })
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            return alert(data.message || 'Помилка оновлення статусу');
-        }
 
         item.status = newStatus;
         renderCards();
     } catch (error) {
-        alert('Помилка з’єднання із сервером');
+        alert(error.message || 'Помилка оновлення статусу');
     }
 }
-
 function trackVisit(id) {
     const item = resources.find(r => r.id === id);
     if (!item || state.currentUserRole === 'guest') return;
@@ -663,83 +666,54 @@ function renderUsers(users) {
 }
 
 async function deleteUser(userId, username) {
-    const confirmed = confirm(`Точно видалити користувача "${username}"?`);
-    if (!confirmed) return;
+    if (!confirm(`Точно видалити користувача "${username}"?`)) return;
 
     try {
-        const token = localStorage.getItem('accessToken');
-
-        const res = await fetch(`${API.auth}/user/${userId}`, {
+        const data = await request(`${API.auth}/user/${userId}`, {
             method: 'DELETE',
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+            headers: authHeaders()
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            return showMessage(data.message || 'Помилка видалення користувача', 'users-message', true);
-        }
 
         showMessage(data.message || 'Користувача видалено', 'users-message');
         await loadUsers();
     } catch (error) {
-        showMessage('Помилка з’єднання із сервером', 'users-message', true);
+        showMessage(error.message || 'Помилка видалення користувача', 'users-message', true);
     }
 }
 
 function openResourceModal(resource = null) {
-    document.getElementById('resource-modal').style.display = 'flex';
-    document.getElementById('resource-message').innerText = '';
+    openModal('resource-modal');
+    setHTML('resource-message', '');
 
-    if (resource) {
-        document.getElementById('resource-modal-title').innerText = 'Редагувати ресурс';
-        document.getElementById('resource-id').value = resource.id;
-        document.getElementById('resource-title').value = resource.title || '';
-        document.getElementById('resource-url').value = resource.url || '';
-        document.getElementById('resource-type').value = resource.type_id || 2;
-    } else {
-        document.getElementById('resource-modal-title').innerText = 'Додати ресурс';
-        document.getElementById('resource-id').value = '';
-        document.getElementById('resource-title').value = '';
-        document.getElementById('resource-url').value = '';
-        document.getElementById('resource-type').value = '2';
-    }
+    const isEdit = !!resource;
+
+    setHTML('resource-modal-title', isEdit ? 'Редагувати ресурс' : 'Додати ресурс');
+    setValue('resource-id', isEdit ? resource.id : '');
+    setValue('resource-title', isEdit ? resource.title : '');
+    setValue('resource-url', isEdit ? resource.url : '');
+    setValue('resource-type', isEdit ? resource.type_id : '2');
 }
 
 async function saveResource() {
     try {
-        const token = localStorage.getItem('accessToken');
+        const resourceId = getValue('resource-id');
 
-        const resourceId = document.getElementById('resource-id').value;
-        const title = document.getElementById('resource-title').value.trim();
-        const url = document.getElementById('resource-url').value.trim();
-        const type_id = Number(document.getElementById('resource-type').value);
-
-        const body = { title, url, type_id };
+        const body = {
+            title: getValue('resource-title'),
+            url: getValue('resource-url'),
+            type_id: Number(getValue('resource-type'))
+        };
 
         const isEdit = !!resourceId;
-        const endpoint = isEdit
-            ? `http://localhost:3000/api/resources/${resourceId}`
-            : `http://localhost:3000/api/resources`;
 
-        const method = isEdit ? 'PUT' : 'POST';
-
-        const res = await fetch(endpoint, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            return showMessage(data.message || 'Помилка збереження ресурсу', 'resource-message', true);
-        }
+        const data = await request(
+            isEdit ? `${API.resources}/${resourceId}` : API.resources,
+            {
+                method: isEdit ? 'PUT' : 'POST',
+                headers: authHeaders(true),
+                body: JSON.stringify(body)
+            }
+        );
 
         showMessage(data.message || 'Ресурс збережено', 'resource-message');
 
@@ -749,7 +723,7 @@ async function saveResource() {
             closeResourceModal();
         }, 500);
     } catch (error) {
-        showMessage('Помилка з’єднання із сервером', 'resource-message', true);
+        showMessage(error.message || 'Помилка збереження ресурсу', 'resource-message', true);
     }
 }
 
@@ -764,31 +738,18 @@ async function deleteResource(id) {
     const resource = resources.find(item => item.id === id);
     const title = resource ? resource.title : `ID ${id}`;
 
-    const confirmed = confirm(`Точно видалити ресурс "${title}"?`);
-    if (!confirmed) return;
+    if (!confirm(`Точно видалити ресурс "${title}"?`)) return;
 
     try {
-        const token = localStorage.getItem('accessToken');
-
-        const res = await fetch(`http://localhost:3000/api/resources/${id}`, {
+        const data = await request(`${API.resources}/${id}`, {
             method: 'DELETE',
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+            headers: authHeaders()
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            console.error('DELETE RESOURCE ERROR:', data);
-            return alert(data.message || 'Помилка видалення ресурсу');
-        }
 
         await loadResources();
         alert(data.message || 'Ресурс видалено');
     } catch (error) {
-        console.error('DELETE RESOURCE FETCH ERROR:', error);
-        alert('Помилка з’єднання із сервером');
+        alert(error.message || 'Помилка видалення ресурсу');
     }
 }
 
@@ -813,30 +774,18 @@ async function tryAutoLogin() {
 
 async function loadUserResourceStatuses() {
     try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) return {};
+        if (!token()) return {};
 
-        const res = await fetch('http://localhost:3000/api/user-resources', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+        const data = await request(API.userResources, {
+            headers: authHeaders()
         });
 
-        const data = await res.json();
-
-        if (!res.ok) {
-            console.error('Помилка завантаження статусів:', data.message);
-            return {};
-        }
-
-        const statusMap = {};
-        data.items.forEach(item => {
-            statusMap[item.resource_id] = item.status;
-        });
-
-        return statusMap;
+        return data.items.reduce((map, item) => {
+            map[item.resource_id] = item.status;
+            return map;
+        }, {});
     } catch (error) {
-        console.error('Помилка з’єднання при завантаженні статусів:', error);
+        console.error('Помилка завантаження статусів:', error.message);
         return {};
     }
 }
@@ -859,4 +808,17 @@ document.getElementById('resource-modal').addEventListener('click', function(e) 
     }
 });
 
-tryAutoLogin();
+async function initApp() {
+    handleOAuthRedirect();
+    await tryAutoLogin();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeProfileModal();
+        closeUsersModal();
+        closeResourceModal();
+    }
+});
+
+initApp();

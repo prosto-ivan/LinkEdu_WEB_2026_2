@@ -1,0 +1,2 @@
+{"level":"info","message":{"duration":"53ms","method":"POST","statusCode":404,"type":"performance","url":"/api/status"},"timestamp":"2026-05-13T23:31:19.773Z"}
+{"level":"info","message":{"duration":"29ms","method":"GET","statusCode":200,"type":"performance","url":"/api/status"},"timestamp":"2026-05-13T23:31:25.487Z"}
