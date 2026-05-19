@@ -1,16 +1,50 @@
 const express = require('express');
+const { body } = require('express-validator');
+
+const validateRequest = require('../middleware/validationMiddleware');
+
 const Resource = require('../models/Resource');
 const User = require('../models/User');
 const ResourceType = require('../models/ResourceType');
+
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 const logError = require('../utils/logger');
 
+const cache = require('../utils/cache');
 const router = express.Router();
+
+const resourceValidation = [
+    body('title')
+        .trim()
+        .isLength({ min: 3 })
+        .withMessage('Назва ресурсу має містити мінімум 3 символи'),
+
+    body('url')
+        .trim()
+        .isURL()
+        .withMessage('URL має бути коректним посиланням'),
+
+    body('type_id')
+        .isInt({ min: 1 })
+        .withMessage('Тип ресурсу має бути числовим ID')
+];
 
 // GET ALL RESOURCES
 router.get('/', async (req, res) => {
     try {
+        const cacheKey = 'resources:list';
+
+        const cachedResources = cache.get(cacheKey);
+
+        if (cachedResources) {
+            return res.json({
+                message: 'Список ресурсів отримано з кешу',
+                source: 'cache',
+                resources: cachedResources
+            });
+        }
+
         const resources = await Resource.findAll({
             include: [
                 {
@@ -19,16 +53,30 @@ router.get('/', async (req, res) => {
                     attributes: ['user_id', 'username', 'email']
                 },
                 {
-                    model: require('../models/ResourceType'),
+                    model: ResourceType,
                     as: 'resourceType',
                     attributes: ['type_id', 'type_name']
                 }
             ],
+            attributes: ['resource_id', 'title', 'url', 'type_id', 'created_by', 'createdAt'],
             order: [['resource_id', 'ASC']]
         });
 
+        const plainResources = resources.map(resource => resource.toJSON());
+
+        cache.set(cacheKey, plainResources);
+
         return res.json({
-            message: 'Список ресурсів успішно отримано',
+            message: 'Список ресурсів отримано з бази даних',
+            source: 'database',
+            resources: plainResources
+        });
+
+        cache.set(cacheKey, resources);
+
+        return res.json({
+            message: 'Список ресурсів отримано з бази даних',
+            source: 'database',
             resources
         });
     } catch (error) {
@@ -68,7 +116,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // CREATE RESOURCE (ADMIN ONLY)
-router.post('/', authMiddleware, roleMiddleware(1), async (req, res) => {
+router.post('/', authMiddleware, roleMiddleware(1), resourceValidation, validateRequest, async (req, res) => {
     try {
         const { title, url, type_id } = req.body;
 
@@ -83,6 +131,8 @@ router.post('/', authMiddleware, roleMiddleware(1), async (req, res) => {
             created_by: req.user.user_id
         });
 
+        cache.del('resources:list');
+
         return res.status(201).json({
             message: 'Ресурс успішно створено',
             resource: newResource
@@ -94,7 +144,7 @@ router.post('/', authMiddleware, roleMiddleware(1), async (req, res) => {
 });
 
 // UPDATE RESOURCE (ADMIN ONLY)
-router.put('/:id', authMiddleware, roleMiddleware(1), async (req, res) => {
+router.put('/:id', authMiddleware, roleMiddleware(1), resourceValidation, validateRequest, async (req, res) => {
     try {
         const { id } = req.params;
         const { title, url, type_id } = req.body;
@@ -112,6 +162,8 @@ router.put('/:id', authMiddleware, roleMiddleware(1), async (req, res) => {
         if (type_id) resource.type_id = type_id;
 
         await resource.save();
+
+        cache.del('resources:list');
 
         return res.json({
             message: 'Ресурс успішно оновлено',
@@ -137,6 +189,8 @@ router.delete('/:id', authMiddleware, roleMiddleware(1), async (req, res) => {
         }
 
         await resource.destroy();
+
+        cache.del('resources:list');
 
         return res.json({
             message: 'Ресурс успішно видалено'

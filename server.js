@@ -4,6 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const morgan = require('morgan');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const fs = require('fs');
 const path = require('path');
 const passport = require('passport');
@@ -27,6 +30,13 @@ const UserResource = require('./models/UserResource');
 
 const app = express();
 const PORT = 3000;
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    message: {
+        message: 'Забагато запитів з одного IP. Спробуйте пізніше.'
+    }
+});
 
 
 if (!fs.existsSync('logs')) {
@@ -75,7 +85,27 @@ Resource.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 // Middleware
 app.use(cors());
 app.use(express.json());
+/*app.use((req, res, next) => {
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('Content-Security-Policy-Report-Only');
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    next();
+});*/
+
 app.use(express.static('public'));
+app.use(express.static('public'));
+app.use(
+    helmet({
+       contentSecurityPolicy: false   
+    })
+);
+app.use(compression());
+app.use('/api', apiLimiter);
+
 
 app.use(morgan('dev'));
 app.use(morgan('combined', { stream: accessLogStream }));
@@ -85,6 +115,7 @@ app.use(performanceMiddleware);
 app.use(passport.initialize());
 
 // Маршрути
+
 app.use('/api/auth', authRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/user-resources', userResourceRoutes);
