@@ -2388,3 +2388,15 @@
 {"level":"info","message":{"duration":"3ms","method":"GET","statusCode":304,"type":"performance","url":"/api/resources/2"},"timestamp":"2026-05-20T20:50:17.921Z"}
 {"level":"info","message":"Server started on port 3000","timestamp":"2026-05-20T20:52:41.060Z"}
 {"level":"info","message":"[logger] Server started on port 3000","timestamp":"2026-05-20T20:52:41.348Z"}
+{"level":"info","message":"Server started on port 3000","timestamp":"2026-05-20T20:57:33.101Z"}
+{"level":"info","message":"Server started on port 3000","timestamp":"2026-05-20T20:59:15.318Z"}
+{"level":"info","message":"[logger] Server started on port 3000","timestamp":"2026-05-20T20:59:15.553Z"}
+{"level":"info","message":{"duration":"79ms","method":"GET","statusCode":304,"type":"performance","url":"/api/meta/roles"},"timestamp":"2026-05-20T20:59:34.726Z"}
+{"level":"info","message":{"duration":"6ms","method":"GET","statusCode":304,"type":"performance","url":"/api/meta/resource-types"},"timestamp":"2026-05-20T20:59:34.737Z"}
+{"level":"info","message":{"duration":"22ms","method":"GET","statusCode":304,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-20T20:59:34.766Z"}
+{"level":"info","message":{"duration":"8ms","method":"GET","statusCode":304,"type":"performance","url":"/api/user-resources"},"timestamp":"2026-05-20T20:59:34.779Z"}
+{"level":"info","message":{"duration":"9ms","method":"GET","statusCode":200,"type":"performance","url":"/api/auth/profile"},"timestamp":"2026-05-20T20:59:34.793Z"}
+{"level":"info","message":{"duration":"6ms","method":"GET","statusCode":304,"type":"performance","url":"/api/auth/profile"},"timestamp":"2026-05-20T20:59:34.803Z"}
+{"level":"info","message":{"duration":"6ms","method":"GET","statusCode":200,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-20T20:59:34.813Z"}
+{"level":"info","message":{"duration":"4ms","method":"GET","statusCode":304,"type":"performance","url":"/api/user-resources"},"timestamp":"2026-05-20T20:59:34.821Z"}
+{"level":"info","message":{"duration":"5ms","method":"GET","statusCode":304,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-20T20:59:45.130Z"}
