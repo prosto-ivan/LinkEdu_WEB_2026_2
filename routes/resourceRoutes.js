@@ -30,6 +30,33 @@ const resourceValidation = [
         .withMessage('Тип ресурсу має бути числовим ID')
 ];
 
+/**
+ * @swagger
+ * /api/resources:
+ *   get:
+ *     summary: Отримати список навчальних ресурсів
+ *     tags: [Resources]
+ *     responses:
+ *       200:
+ *         description: Список ресурсів успішно отримано
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 source:
+ *                   type: string
+ *                   example: database
+ *                 resources:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Resource'
+ *       500:
+ *         description: Помилка сервера
+ */
+
 // GET ALL RESOURCES
 router.get('/', async (req, res) => {
     try {
@@ -85,6 +112,28 @@ router.get('/', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/resources/{id}:
+ *   get:
+ *     summary: Отримати ресурс за ID
+ *     tags: [Resources]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID ресурсу
+ *     responses:
+ *       200:
+ *         description: Ресурс успішно отримано
+ *       404:
+ *         description: Ресурс не знайдено
+ *       500:
+ *         description: Помилка сервера
+ */
+
 // GET ONE RESOURCE
 router.get('/:id', async (req, res) => {
     try {
@@ -115,6 +164,47 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/resources:
+ *   post:
+ *     summary: Створити новий ресурс
+ *     tags: [Resources]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - url
+ *               - type_id
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: JavaScript Course
+ *               url:
+ *                 type: string
+ *                 example: https://example.com/course
+ *               type_id:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Ресурс успішно створено
+ *       400:
+ *         description: Помилка валідації
+ *       401:
+ *         description: Немає токена
+ *       403:
+ *         description: Недостатньо прав доступу
+ *       500:
+ *         description: Помилка сервера
+ */
+
 // CREATE RESOURCE (ADMIN ONLY)
 router.post('/', authMiddleware, roleMiddleware(1), resourceValidation, validateRequest, async (req, res) => {
     try {
@@ -142,6 +232,52 @@ router.post('/', authMiddleware, roleMiddleware(1), resourceValidation, validate
         return res.status(500).json({ message: 'Помилка сервера' });
     }
 });
+
+/**
+ * @swagger
+ * /api/resources/{id}:
+ *   put:
+ *     summary: Оновити ресурс за ID
+ *     tags: [Resources]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID ресурсу
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Updated JavaScript Course
+ *               url:
+ *                 type: string
+ *                 example: https://example.com/updated-course
+ *               type_id:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Ресурс успішно оновлено
+ *       400:
+ *         description: Помилка валідації
+ *       401:
+ *         description: Немає токена
+ *       403:
+ *         description: Недостатньо прав доступу
+ *       404:
+ *         description: Ресурс не знайдено
+ *       500:
+ *         description: Помилка сервера
+ */
 
 // UPDATE RESOURCE (ADMIN ONLY)
 router.put('/:id', authMiddleware, roleMiddleware(1), resourceValidation, validateRequest, async (req, res) => {
@@ -174,6 +310,34 @@ router.put('/:id', authMiddleware, roleMiddleware(1), resourceValidation, valida
         return res.status(500).json({ message: 'Помилка сервера' });
     }
 });
+
+/**
+ * @swagger
+ * /api/resources/{id}:
+ *   delete:
+ *     summary: Видалити ресурс за ID
+ *     tags: [Resources]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID ресурсу
+ *     responses:
+ *       200:
+ *         description: Ресурс успішно видалено
+ *       401:
+ *         description: Немає токена
+ *       403:
+ *         description: Недостатньо прав доступу
+ *       404:
+ *         description: Ресурс не знайдено
+ *       500:
+ *         description: Помилка сервера
+ */
 
 // DELETE RESOURCE (ADMIN ONLY)
 router.delete('/:id', authMiddleware, roleMiddleware(1), async (req, res) => {

@@ -21,6 +21,8 @@ const errorMiddleware = require('./middleware/errorMiddleware');
 const uploadRoutes = require('./routes/uploadRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const { logger } = require('./utils/logger');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./docs/swagger');
 
 const Role = require('./models/Role');
 const ResourceType = require('./models/ResourceType');
@@ -29,7 +31,7 @@ const Resource = require('./models/Resource');
 const UserResource = require('./models/UserResource');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 30,
@@ -105,6 +107,7 @@ app.use(
 );
 app.use(compression());
 app.use('/api', apiLimiter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 app.use(morgan('dev'));

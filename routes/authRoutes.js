@@ -23,6 +23,27 @@ const router = express.Router();
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME_MINUTES = 1;
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Реєстрація нового користувача
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: Користувача успішно зареєстровано
+ *       400:
+ *         description: Некоректні дані
+ *       500:
+ *         description: Помилка сервера
+ */
+
 // REGISTER
 router.post('/register', async (req, res) => {
     try {
@@ -82,6 +103,27 @@ router.post('/register', async (req, res) => {
                 return res.status(500).json({ message: 'Помилка сервера' });
             }
 });
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Авторизація користувача
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Авторизація успішна
+ *       400:
+ *         description: Невірний email або пароль
+ *       500:
+ *         description: Помилка сервера
+ */
 
 // LOGIN
 router.post('/login', async (req, res) => {
@@ -201,6 +243,25 @@ router.post('/logout', authMiddleware, async (req, res) => {
         return res.status(500).json({ message: 'Помилка сервера' });
     }
 });
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: Отримати профіль поточного користувача
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Дані профілю отримано
+ *       401:
+ *         description: Немає або неправильний токен
+ *       404:
+ *         description: Користувача не знайдено
+ *       500:
+ *         description: Помилка сервера
+ */
 
 // PROFILE
 router.get('/profile', authMiddleware, async (req, res) => {
