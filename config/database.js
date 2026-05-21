@@ -12,7 +12,7 @@ const sequelize = new Sequelize(
             options: {
                 encrypt: process.env.DB_ENCRYPT === 'true',
                 trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
-                connectTimeout: 30000
+                connectTimeout: 300000
             }
         },
         logging: false
