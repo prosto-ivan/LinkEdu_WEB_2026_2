@@ -136,7 +136,7 @@ async function startServer() {
         await sequelize.authenticate();
         console.log('✅ Підключення до БД успішне');
 
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ alter: false });
         console.log('✅ Таблиці синхронізовано');
     } catch (error) {
         console.error('❌ Помилка підключення до БД:', error);
