@@ -2400,3 +2400,18 @@
 {"level":"info","message":{"duration":"6ms","method":"GET","statusCode":200,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-20T20:59:34.813Z"}
 {"level":"info","message":{"duration":"4ms","method":"GET","statusCode":304,"type":"performance","url":"/api/user-resources"},"timestamp":"2026-05-20T20:59:34.821Z"}
 {"level":"info","message":{"duration":"5ms","method":"GET","statusCode":304,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-20T20:59:45.130Z"}
+{"level":"info","message":"Server started on port 3000","timestamp":"2026-05-21T15:42:00.511Z"}
+{"level":"info","message":"[logger] Server started on port 3000","timestamp":"2026-05-21T15:42:01.146Z"}
+{"level":"info","message":{"duration":"21ms","method":"GET","statusCode":304,"type":"performance","url":"/api/meta/roles"},"timestamp":"2026-05-21T15:42:06.525Z"}
+{"level":"info","message":{"duration":"8ms","method":"GET","statusCode":304,"type":"performance","url":"/api/meta/resource-types"},"timestamp":"2026-05-21T15:42:06.586Z"}
+{"level":"info","message":{"duration":"20ms","method":"GET","statusCode":304,"type":"performance","url":"/api/meta/roles"},"timestamp":"2026-05-21T15:42:06.640Z"}
+{"level":"info","message":{"duration":"38ms","method":"GET","statusCode":200,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-21T15:42:06.644Z"}
+{"level":"info","message":{"duration":"3ms","method":"GET","statusCode":304,"type":"performance","url":"/api/meta/resource-types"},"timestamp":"2026-05-21T15:42:06.661Z"}
+{"level":"info","message":{"duration":"5ms","method":"GET","statusCode":200,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-21T15:42:06.670Z"}
+{"level":"info","message":{"duration":"198ms","method":"POST","statusCode":200,"type":"performance","url":"/api/auth/login"},"timestamp":"2026-05-21T15:42:21.715Z"}
+{"level":"info","message":{"duration":"6ms","method":"GET","statusCode":200,"type":"performance","url":"/api/auth/profile"},"timestamp":"2026-05-21T15:42:21.725Z"}
+{"level":"info","message":{"duration":"1ms","method":"GET","statusCode":304,"type":"performance","url":"/api/resources"},"timestamp":"2026-05-21T15:42:21.730Z"}
+{"level":"info","message":{"duration":"7ms","method":"GET","statusCode":200,"type":"performance","url":"/api/user-resources"},"timestamp":"2026-05-21T15:42:21.798Z"}
+{"level":"info","message":{"duration":"14ms","method":"POST","statusCode":200,"type":"performance","url":"/api/auth/logout"},"timestamp":"2026-05-21T15:42:23.530Z"}
+{"level":"info","message":"Server started on port 3000","timestamp":"2026-05-21T21:18:17.054Z"}
+{"level":"info","message":"[logger] Server started on port 3000","timestamp":"2026-05-21T21:18:17.680Z"}
