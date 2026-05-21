@@ -127,20 +127,24 @@ app.use('/api', uploadRoutes);
 app.use('/api', statusRoutes);
 
 async function startServer() {
-    logger.info('Server started on port 3000');
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`✅ Сервер запущено: http://0.0.0.0:${PORT}`);
+        logger.info(`[logger] Server started on port ${PORT}`);
+    });
+
     try {
         await sequelize.authenticate();
         console.log('✅ Підключення до БД успішне');
 
-        await sequelize.sync({ alter: true  });
+        await sequelize.sync({ alter: true });
         console.log('✅ Таблиці синхронізовано');
-
-        app.listen(PORT, () => {
-            logger.info('[logger] Server started on port 3000');
-            console.log(`✅ Сервер запущено: http://localhost:${PORT}`);
-        });
     } catch (error) {
-        console.error('❌ Помилка запуску сервера:', error);
+        console.error('❌ Помилка підключення до БД:', error);
+        logger.error({
+            place: 'database-connect',
+            message: error.message,
+            stack: error.stack
+        });
     }
 }
 app.use(errorMiddleware);
