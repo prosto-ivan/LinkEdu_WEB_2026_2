@@ -132,7 +132,7 @@ async function startServer() {
         await sequelize.authenticate();
         console.log('✅ Підключення до БД успішне');
 
-        await sequelize.sync({ alter: false });
+        await sequelize.sync({ alter: true  });
         console.log('✅ Таблиці синхронізовано');
 
         app.listen(PORT, () => {
